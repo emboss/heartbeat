@@ -10,7 +10,7 @@ If no port is specified, 443 is assumed as the default.
  
 ### Disclaimer
 
-Do not use any this script to cause harm.
+Do not use this script to cause harm.
 
 ### License
 
