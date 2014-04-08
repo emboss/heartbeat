@@ -30,7 +30,7 @@ class TLSRecord
 end
 
 def read_record(sock)
-  Timeout.timeout(2) do
+  Timeout.timeout(3) do
     type = sock.read(1)
     version = sock.read(2)
     length = sock.read(2).unpack('n')[0]
@@ -51,7 +51,7 @@ port = ARGV[1] ? ARGV[1].to_i : 443
 raise "Usage: ruby heartbeat.rb <server>" unless server
 
 sock = begin
-  Timeout.timeout(2) { TCPSocket.open(server, port) }
+  Timeout.timeout(3) { TCPSocket.open(server, port) }
 rescue Timeout::Error
   puts "Couldn't connect to #{server}:#{port}"
   exit 1
@@ -71,10 +71,11 @@ sock.write(PAYLOAD)
 begin
   heartbeat = read_record(sock)
 
-  if heartbeat.type == "\x18"
+  case heartbeat.type
+  when "\x18"
     raise "Server vulnerable!" if heartbeat.value
-    puts "Server sent a hearbeat response, but no data. This is OK."
-  elsif heartbeat.type == "\x15"
+    puts "Server sent a heartbeat response, but no data. This is OK."
+  when "\x15"
     puts "Server sent an alert instead of a heartbeat response. This is OK."
   else
     raise "Server sent an unexpected ContentType: #{heartbeat.type.inspect}"
