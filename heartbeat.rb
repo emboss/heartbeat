@@ -24,17 +24,7 @@ module ContentType
   HEARTBEAT = "\x18"
 end
 
-class TLSRecord
-
-  attr_reader :type, :version, :value
-
-  def initialize(type, version, value)
-    @type = type
-    @version = version
-    @value = value
-  end
-
-end
+TLSRecord = Struct.new(:type, :version, :value)
 
 def read_record(sock)
   Timeout.timeout(3) do
