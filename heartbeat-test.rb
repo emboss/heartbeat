@@ -12,7 +12,7 @@ def read_until_server_hello_done(sock)
 end
 
 server = ARGV[0]
-port = ARGV[1] ? ARGV[1].to_i : 443
+port = (ARGV[1] || 443).to_i
 raise "Usage: ruby heartbeat.rb <server>" unless server
 
 sock = begin

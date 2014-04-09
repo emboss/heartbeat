@@ -2,7 +2,8 @@ require 'socket'
 require 'openssl'
 
 begin
-  socket = TCPSocket.new('localhost', 4443)
+  port = (ARGV[0] || 4443).to_i
+  socket = TCPSocket.new('localhost', port)
   ssl = OpenSSL::SSL::SSLSocket.new(socket)
   ssl.sync_close = true
   ssl.connect

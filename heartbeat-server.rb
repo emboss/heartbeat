@@ -6,7 +6,6 @@ require 'openssl'
 require_relative 'shared'
 
 port = (ARGV[0] || 4443).to_i
-
 server = TCPServer.new("localhost", port)
 
 loop do
